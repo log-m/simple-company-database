@@ -38,7 +38,7 @@ public class AddressDaoImpl implements AddressDAO
 			ps.setString(3, address.getcity());
 			ps.setString(4, address.getstate());
 			ps.setString(5, address.getzipcode());
-      ps.setString(6, address.getownerID());
+   		   	ps.setLong(6, customerID);
       
       
 			int res = ps.executeUpdate();

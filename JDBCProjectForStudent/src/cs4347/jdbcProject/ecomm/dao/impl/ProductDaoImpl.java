@@ -160,5 +160,57 @@ public class ProductDaoImpl implements ProductDAO
 			}
 		}
 	}
+	public Product update(Connection connection, Long id) throws SQLException, DAOException{
+		if(id == null) {
+			throw new DAOException("Trying to update Product with NULL ID");
+		}
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(updateSQL);
+			ps.setString(1, "prodName");
+			ps.setString(2, "prodDescription");
+			ps.setInt(3, "prodCategory");
+			ps.setString(4,"prodUPC");
+			
+			int count = ps.executeUpdate();
+			
+			if(count > 1){
+				throw new DAOException("Did Not Update Expected Number Of Rows);
+			}
+			return count;
+			
+			
+		}
+		finally {
+			if(ps != null && !ps.isClosed()) {
+				ps.close();
+			}
+		}
+	}
 	
+	public int delete(Connection connection, Long id) throws SQLException, DAOException{
+		if(id == null) {
+			throw new DAOException("Trying to delete Product with NULL ID");
+		}
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(deleteSQL);
+			
+			ps.setLong(1, id);
+			
+			int count = ps.executeUpdate();
+			
+			if(count > 1) {
+					  throw new DAOException("Did Not Retrieve Expected Number Of Rows");
+			}
+			return count;
+			
+			
+		}
+		finally {
+			if(ps != null && !ps.isClosed()) {
+				ps.close();
+			}
+		}
+	}
 }

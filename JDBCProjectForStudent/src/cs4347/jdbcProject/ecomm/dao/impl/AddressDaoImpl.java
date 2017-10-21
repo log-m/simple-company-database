@@ -55,7 +55,7 @@ public class AddressDaoImpl implements AddressDAO
 		}
 	}
 	
-	public  Address retrieve(Connection connection, Long customerID) throws SQLException, DAOException{
+	public  Address retrieveForCustomerID(Connection connection, Long customerID) throws SQLException, DAOException{
 		if(customerID == null) {
 			throw new DAOException("Trying to retrieve Address with NULL ID");
 		}

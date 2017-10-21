@@ -75,7 +75,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `simple_company`.`CreditCard` (
   `name` VARCHAR(45) NULL,
   `ccNumber` VARCHAR(45) NULL,
-  `expDAte` VARCHAR(45) NULL,
+  `expDate` VARCHAR(45) NULL,
   `securityCode` VARCHAR(45) NULL,
   `ownerID` BIGINT NOT NULL,
   PRIMARY KEY (`ownerID`),

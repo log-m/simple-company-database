@@ -75,6 +75,7 @@ public class ProductDaoImpl implements ProductDAO
 			else {
 				Product prod = new Product();
 				prod.setId(rs.getLong("id"));
+				prod.setProdName(rs.getString("prodName"));
 				prod.setProdDescription(rs.getString("prodDescription"));
 				prod.setProdCategory(rs.getInt("prodCategory"));
 				prod.setProdUPC(rs.getString("prodUPC"));

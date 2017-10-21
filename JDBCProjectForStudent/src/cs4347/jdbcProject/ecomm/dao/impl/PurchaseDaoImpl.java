@@ -118,6 +118,7 @@ public class PurchaseDaoImpl implements PurchaseDAO
 			ps.setLong(2, purchase.getCustomerID());
 			ps.setDate(3, purchase.getPurchaseDate());
 			ps.setDouble(4, purchase.getPurchaseAmount());
+			ps.setLong(5, purchase.getID());
 						
 			int count = ps.executeUpdate();
 			

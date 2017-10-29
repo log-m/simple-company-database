@@ -77,3 +77,120 @@ public class CustomerPersistenceServiceImpl implements CustomerPersistenceServic
 		}
 	}
 }
+public Customer retrieve(Long id) throws SQLException, DAOException{
+		CustomerDAO custDAO = new CustomerDaoImpl();
+		Connection conn = dataSource.getConnection();
+		try {
+			conn.setAutoCommit(false);
+			Customer cust = CustomerDAO.retrieve(conn, id); //throw null ID DAOException in here
+			conn.commit();
+			return cust;
+		}
+		catch(Exception ex) {
+			conn.rollback();
+			throw ex;
+		}
+		finally {
+			if(conn != null) {
+				conn.setAutoCommit(true);
+			}
+			if(conn != null && !conn.isClosed()) {
+				conn.close();
+			}
+		}
+	}
+	
+	public int update(Customer customer) throws SQLException, DAOException{
+		CustomerDAO custDAO = new CustomerDaoImpl();
+		Connection conn = dataSource.getConnection();
+		try {
+			conn.setAutoCommit(false);
+			int count = custDAO.update(conn, customer); //throw null ID DAOException in here
+			conn.commit();
+			return count;
+		}
+		catch(Exception ex) {
+			conn.rollback();
+			throw ex;
+		}
+		finally {
+			if(conn != null) {
+				conn.setAutoCommit(true);
+			}
+			if(conn != null && !conn.isClosed()) {
+				conn.close();
+			}
+		}
+	}
+	
+	public int delete(Long id) throws SQLException, DAOException{
+		CustomerDAO custDAO = new CustomerDaoImpl();
+		Connection conn = dataSource.getConnection();
+		try {
+			conn.setAutoCommit(false);
+			int count = custDAO.delete(conn, id); //throw null ID DAOException in here
+			conn.commit();
+			return count;
+		}
+		catch(Exception ex) {
+			conn.rollback();
+			throw ex;
+		}
+		finally {
+			if(conn != null) {
+				conn.setAutoCommit(true);
+			}
+			if(conn != null && !conn.isClosed()) {
+				conn.close();
+			}
+		}
+	}
+	
+	public Customer retrieveByZipCode(String zipCode) throws SQLException, DAOException{
+		CustomerDAO custDAO = new CustomerDaoImpl();
+		Connection conn = dataSource.getConnection();
+		try {
+			conn.setAutoCommit(false);
+			Customer cust = custDAO.retrieveByZipCode(conn, zipCode); //throw null ID DAOException in here
+			conn.commit();
+			return cust;
+		}
+		catch(Exception ex) {
+			conn.rollback();
+			throw ex;
+		}
+		finally {
+			if(conn != null) {
+				conn.setAutoCommit(true);
+			}
+			if(conn != null && !conn.isClosed()) {
+				conn.close();
+			}
+		}
+	}
+	
+	public List<Customer> retrieveByDOB(Date startDate, Date endDate) throws SQLException, DAOException{
+		CustomerDAO custDAO = new CustomerDaoImpl();
+		Connection conn = dataSource.getConnection();
+		try {
+			conn.setAutoCommit(false);
+			List<Customer> custs = custDAO.retrieveByDOB(conn, startDate, endDate); //throw null ID DAOException in here
+			conn.commit();
+			return custs;
+		}
+		catch(Exception ex) {
+			conn.rollback();
+			throw ex;
+		}
+		finally {
+			if(conn != null) {
+				conn.setAutoCommit(true);
+			}
+			if(conn != null && !conn.isClosed()) {
+				conn.close();
+			}
+		}
+	}
+
+}
+

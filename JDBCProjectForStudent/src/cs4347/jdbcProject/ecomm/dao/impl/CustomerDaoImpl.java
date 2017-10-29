@@ -28,33 +28,35 @@ public class CustomerDaoImpl implements CustomerDAO
 	private static final String retrieveSQL = 
 			"SELECT * FROM CUSTOMER WHERE ? = ?";
 	private static final String updateSQL =
-			"UPDATE CUSTOMER SET  WHERE id = ?, firstName = ?, lastName = ?, gender = ? dob = ? email = ?";
+			"UPDATE CUSTOMER SET"  firstName = ?, lastName = ?, gender = ?, dob = ?, email = ? WHERE id = ?;
 	private static final String  deleteSQL =
 			"DELETE FROM CUSTOMER WHERE id = ?";
       
-	public Address create(Connection connection, Address address, Long customerID ) throws SQLException, DAOException
+	public Customer create(Connection connection, Customer customer) throws SQLException, DAOException
 	{
-		if( customerID == null) {
-			throw new DAOException("Trying to insert Address with NON-NULL ID");
+		if(product.getId() != null) {
+			throw new DAOException("Trying to insert Customer with NON-NULL ID");
 		}
 		
 		PreparedStatement ps = null;
 		try {
-			ps = connection.prepareStatement(insertSQL);
-			ps.setString(1, address.getaddress1());
-			ps.setString(2, address.getaddress2());
-			ps.setString(3, address.getcity());
-			ps.setString(4, address.getstate());
-			ps.setString(5, address.getzipcode());
-   		   	ps.setLong(6, customerID);
-      
-      
+			ps = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS);
+			ps.setString(1, Customer.firstName());
+			ps.setString(2, Customer.lastName());
+			ps.setString(3, Customer.gender());
+			ps.setString(4, Customer.dob());
+			ps.setString(5, Customer.email());
+			
+			
 			int res = ps.executeUpdate();
 			if(res != 1) {
 				throw new DAOException("Did Not Create Expected Number Of Rows");
 			}
-		
-			return address;
+			ResultSet krs = ps.getGeneratedKeys();
+			krs.next();
+			int autoID = krs.getInt(1);
+			product.setId((long) autoID);
+			return customer;
 		}
 		finally {
 			if(ps != null && !ps.isClosed()) {
@@ -63,15 +65,15 @@ public class CustomerDaoImpl implements CustomerDAO
 		}
 	}
 	
-	public  Address retrieveForCustomerID(Connection connection, Long customerID) throws SQLException, DAOException{
-		if(customerID == null) {
-			throw new DAOException("Trying to retrieve Address with NULL ID");
+	public Customer retrieve(Connection connection, Long id) throws SQLException, DAOException{
+		if(id == null) {
+			throw new DAOException("Trying to retrieve Customer with NULL ID");
 		}
 		PreparedStatement ps = null;
 		try {
 			ps = connection.prepareStatement(retrieveSQL);
-			ps.setString(1, "ownerID");
-			ps.setLong(2, customerID);
+			ps.setString(1, "id");
+			ps.setLong(2, id);
 			
 			ResultSet rs = ps.executeQuery();
 			if(!rs.next()) {
@@ -82,16 +84,15 @@ public class CustomerDaoImpl implements CustomerDAO
 					  throw new DAOException("Did Not Retrieve Expected Number Of Rows");
 			}
 			else {
-				Address address = new Address();
-				address.setaddress1(rs.getaddress1("address1"));
-				address.setaddress2(rs.getaddress2("address2"));
-				address.setcity(rs.getcity("city"));
-        address.setstate(rs.getstate("state));
-        address.setzipcode(rs.getzipcode("zipcode"));
-       
-        
-        
-				return address;
+			
+				Customer cust = new Customer();
+				cust.setId(rs.getLong("id"));
+				cust.setFirstName(rs.getString("FirstName"));
+				cust.setLastName(rs.getString("LastName"));
+				cust.setGender(rs.getInt("Gender"));
+				cust.setDob(rs.getString("Dob"));
+				cust.setEmail(rs.getString("Email"));
+				return cust;
 					  
 			}
 			
@@ -103,15 +104,123 @@ public class CustomerDaoImpl implements CustomerDAO
 			}
 		}
 	}
-	void deleteForCustomerID(Connection connection, Long customerID) throws SQLException, DAOException{
-  if(customerID == null) {
-			throw new DAOException("Trying to delete customerID with NULL ID");
+	
+	public List<Customer> retrieveByZipCode(Connection connection, String zipCode) throws SQLException, DAOException{
+		if(Address == null) {
+			throw new DAOException("Trying to retrieve Product with NULL Address code");
+		}
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(retrieveSQL);
+			ps.setString(1, "custAddress");
+			ps.setString(2, cat);
+			
+			ResultSet rs = ps.executeQuery();
+			if(!rs.next()) {
+				return null;
+			}
+			rs.last();
+			if(rs.getRow() != 1) {
+					  throw new DAOException("Did Not Retrieve Expected Number Of Rows");
+			}
+			else {
+				cust = new Customer();
+				cust.setId(rs.getLong("id"));
+				cust.setFirstName(rs.getString("FirstName"));
+				cust.setLastName(rs.getString("LastName"));
+				cust.setGender(rs.getInt("Gender"));
+				cust.setDob(rs.getString("Dob"));
+				cust.setEmail(rs.getString("Email"));
+				custList.add(cust);
+					  
+			}
+			
+			
+		}
+		finally {
+			if(ps != null && !ps.isClosed()) {
+				ps.close();
+			}
+		}
+	}
+	
+	public List<Customer> retrieveByDOB(Connection connection, Date startDate, Date endDate) throws SQLException, DAOException{
+		
+		PreparedStatement ps = null;
+		try {
+			ps = connection.prepareStatement(retrieveSQL);
+			ps.setString(1, "dob");
+			ps.setInt(2, DATE);
+			
+			ResultSet rs = ps.executeQuery();
+			if(!rs.next()) {
+				return null;
+			}
+			rs.beforeFirst();
+			List<Product> prodList = new ArrayList<Customer>();
+			while(rs.next()) {
+				Product cust = new Customer();
+				cust.setId(rs.getLong("id"));
+				cust.setFirstName(rs.getString("FirstName"));
+				cust.setLastName(rs.getString("LastName"));
+				cust.setGender(rs.getInt("Gender"));
+				cust.setDob(rs.getString("Dob"));
+				cust.setEmail(rs.getString("Email"));
+				custList.add(cust);
+					  
+			}
+			return custList;
+			
+			
+		}
+		finally {
+			if(ps != null && !ps.isClosed()) {
+				ps.close();
+			}
+		}
+	}
+	
+	
+	public int update(Connection connection, Customer customer) throws SQLException, DAOException{
+		if(id == null) {
+			throw new DAOException("Trying to update Customer with NULL ID");
+		}
+		PreparedStatement ps = null;
+		try {
+
+			ps = connection.prepareStatement(updateSQL);
+			ps.setString(1, "firstName");
+			ps.setString(2, "lastName");
+			ps.setString(3, "gender");
+			ps.setString(4,"dob");
+			ps.setString(5,"email");
+			ps.setLong(6, id);
+			
+			int count = ps.executeUpdate();
+			
+			if(count > 1){
+				throw new DAOException("Did Not Update Expected Number Of Rows);
+			}
+			return count;
+			
+			
+		}
+		finally {
+			if(ps != null && !ps.isClosed()) {
+				ps.close();
+			}
+		}
+	}
+	
+	public int delete(Connection connection, Long id) throws SQLException, DAOException{
+		if(id == null) {
+			throw new DAOException("Trying to delete Customer with NULL ID");
 		}
 		PreparedStatement ps = null;
 		try {
 			ps = connection.prepareStatement(deleteSQL);
 			
-			ps.setLong(1, customerID);
+			ps.setLong(1, id);
 			
 			int count = ps.executeUpdate();
 			
@@ -127,6 +236,5 @@ public class CustomerDaoImpl implements CustomerDAO
 				ps.close();
 			}
 		}
-	}
 	}
 }

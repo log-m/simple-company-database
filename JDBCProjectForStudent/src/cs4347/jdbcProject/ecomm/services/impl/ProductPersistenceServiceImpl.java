@@ -27,7 +27,7 @@ public class ProductPersistenceServiceImpl implements ProductPersistenceService
 		try {
 			conn.setAutoCommit(false);
 			Product prod = prodDAO.create(conn, product);
-			Long prodID = prod.getId();
+			//Long prodID = prod.getId();
 			conn.commit();
 			return prod;
 			

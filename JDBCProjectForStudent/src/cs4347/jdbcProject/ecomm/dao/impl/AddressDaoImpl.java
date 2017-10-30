@@ -1,3 +1,5 @@
+//GROUP 3
+//Logan Morris, Troy Kim, Karey Smith, Ashley Handoko
 package cs4347.jdbcProject.ecomm.dao.impl;
 
 import java.sql.Connection;
@@ -15,12 +17,12 @@ import cs4347.jdbcProject.ecomm.util.DAOException;
 public class AddressDaoImpl implements AddressDAO
 {
 	private static final String insertSQL = 
-			"INSERT INTO ADDRESS (address1, address2, city, state, zipcode, ownerID"
+			"INSERT INTO ADDRESS (address1, address2, city, state, zipcode, ownerID)"
 			+ "VALUES(?, ?, ?, ?, ?, ?)";
 	private static final String retrieveSQL = 
-			"SELECT * FROM ADDRESS WHERE ? = ?";
-	private static final String updateSQL =
-			"UPDATE ADDRESS SET address1 = ?, address2 = ?, city = ?, state = ? zipcode = ? WHERE ownerID = ?";
+			"SELECT * FROM ADDRESS WHERE ownerID = ?";
+	//private static final String updateSQL =
+		//	"UPDATE ADDRESS SET address1 = ?, address2 = ?, city = ?, state = ? zipcode = ? WHERE ownerID = ?";
 	private static final String  deleteSQL =
 			"DELETE FROM ADDRESS WHERE ownerID = ?";
       
@@ -32,15 +34,16 @@ public class AddressDaoImpl implements AddressDAO
 		
 		PreparedStatement ps = null;
 		try {
+			//sql
 			ps = connection.prepareStatement(insertSQL);
-			ps.setString(1, address.getaddress1());
-			ps.setString(2, address.getaddress2());
-			ps.setString(3, address.getcity());
-			ps.setString(4, address.getstate());
-			ps.setString(5, address.getzipcode());
+			ps.setString(1, address.getAddress1());
+			ps.setString(2, address.getAddress2());
+			ps.setString(3, address.getCity());
+			ps.setString(4, address.getState());
+			ps.setString(5, address.getZipcode());
    		   	ps.setLong(6, customerID);
       
-      
+   		   	//execute
 			int res = ps.executeUpdate();
 			if(res != 1) {
 				throw new DAOException("Did Not Create Expected Number Of Rows");
@@ -61,11 +64,15 @@ public class AddressDaoImpl implements AddressDAO
 		}
 		PreparedStatement ps = null;
 		try {
+			//sql
 			ps = connection.prepareStatement(retrieveSQL);
-			ps.setString(1, "ownerID");
-			ps.setLong(2, customerID);
+			//ps.setString(1, "ownerID");
+			ps.setLong(1, customerID);
 			
+			//execute
 			ResultSet rs = ps.executeQuery();
+			
+			//check if exactly 1 result
 			if(!rs.next()) {
 				return null;
 			}
@@ -74,12 +81,13 @@ public class AddressDaoImpl implements AddressDAO
 					  throw new DAOException("Did Not Retrieve Expected Number Of Rows");
 			}
 			else {
+				//convert row to object
 				Address address = new Address();
-				address.setaddress1(rs.getaddress1("address1"));
-				address.setaddress2(rs.getaddress2("address2"));
-				address.setcity(rs.getcity("city"));
-        address.setstate(rs.getstate("state));
-        address.setzipcode(rs.getzipcode("zipcode"));
+				address.setAddress1(rs.getString("address1"));
+				address.setAddress2(rs.getString("address2"));
+				address.setCity(rs.getString("city"));
+        address.setState(rs.getString("state"));
+        address.setZipcode(rs.getString("zipcode"));
        
         
         
@@ -95,22 +103,23 @@ public class AddressDaoImpl implements AddressDAO
 			}
 		}
 	}
-	void deleteForCustomerID(Connection connection, Long customerID) throws SQLException, DAOException{
+public	void deleteForCustomerID(Connection connection, Long customerID) throws SQLException, DAOException{
   if(customerID == null) {
-			throw new DAOException("Trying to delete customerID with NULL ID");
+			throw new DAOException("Trying to delete address with NULL customer ID");
 		}
 		PreparedStatement ps = null;
 		try {
+			//sql
 			ps = connection.prepareStatement(deleteSQL);
 			
 			ps.setLong(1, customerID);
-			
+			//execute
 			int count = ps.executeUpdate();
 			
 			if(count > 1) {
-					  throw new DAOException("Did Not Retrieve Expected Number Of Rows");
+					  throw new DAOException("Did Not Delete Expected Number Of Rows");
 			}
-			return count;
+			//return count;
 			
 			
 		}
@@ -120,5 +129,5 @@ public class AddressDaoImpl implements AddressDAO
 			}
 		}
 	}
-	}
 }
+

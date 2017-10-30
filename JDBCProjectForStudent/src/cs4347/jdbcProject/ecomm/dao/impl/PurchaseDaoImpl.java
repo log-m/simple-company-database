@@ -1,3 +1,5 @@
+//GROUP 3
+//Logan Morris, Troy Kim, Karey Smith, Ashley Handoko
 package cs4347.jdbcProject.ecomm.dao.impl;
 
 import java.sql.Connection;
@@ -15,12 +17,16 @@ import cs4347.jdbcProject.ecomm.util.DAOException;
 
 public class PurchaseDaoImpl implements PurchaseDAO
 {
-	private static final String insertSQL = "INSERT INTO PURCHASE (productID, customerID, purchaseDate, purchaseAmount"
+	private static final String insertSQL = "INSERT INTO PURCHASE (productID, customerID, purchaseDate, purchaseAmount)"
 			+ "VALUES(?, ?, ?, ?)";
 	private static final String retrieveSQL = 
-			"SELECT * FROM PURCHASE WHERE ? = ?";
+			"SELECT * FROM PURCHASE WHERE id = ?";
+	private static final String retrieveCustSQL = 
+			"SELECT * FROM PURCHASE WHERE customerID = ?";
+	private static final String retrieveProdSQL = 
+			"SELECT * FROM PURCHASE WHERE productID = ?";
 	private static final String updateSQL =
-			"UPDATE PURCHASE SET productID = ?, customerID = ?, purchaseDate = ?, purchaseAmount = ? WHERE id = ?";
+			"UPDATE PURCHASE SET  purchaseDate = ?, purchaseAmount = ? WHERE id = ?";
 	private static final String  deleteSQL =
 			"DELETE FROM PURCHASE WHERE id = ?";
 	
@@ -38,16 +44,20 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		
 		PreparedStatement ps = null;
 		try {
+			//Compile query
 			ps = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS);
 			ps.setLong(1, purchase.getProductID());
 			ps.setLong(2, purchase.getCustomerID());
 			ps.setDate(3, purchase.getPurchaseDate());
 			ps.setDouble(4, purchase.getPurchaseAmount());
 			
+			//execute
 			int res = ps.executeUpdate();
+			//System.out.println(res);
 			if(res != 1) {
 				throw new DAOException("Did Not Create Expected Number Of Rows");
 			}
+			//retrieve auto-inc id and set it
 			ResultSet krs = ps.getGeneratedKeys();
 			krs.next();
 			int autoID = krs.getInt(1);
@@ -72,19 +82,24 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		
 		PreparedStatement ps = null;
 		try {
+			//compile SQL
 			ps = connection.prepareStatement(retrieveSQL);
-			ps.setString(1, "id");
-			ps.setLong(2, id);
 			
+			ps.setLong(1, id);
+			
+			//execute
 			ResultSet rs = ps.executeQuery();
+			//check if there is a result set
 			if(!rs.next()) {
 				return null;
 			}
+			//go to end of result set to see if it properly retrieved 1 thing
 			rs.last();
 			if(rs.getRow()!= 1) {
 				throw new DAOException("Did Not Retrieve Expected Number of Rows");
 			}
 			else {
+				//pull attributes in object
 				Purchase purch = new Purchase();
 				purch.setId(rs.getLong("id"));
 				purch.setProductID(rs.getLong("productID"));
@@ -113,13 +128,13 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		
 		PreparedStatement ps = null;
 		try {
+			//compile SQL
 			ps = connection.prepareStatement(updateSQL);
-			ps.setLong(1, purchase.getProductID());
-			ps.setLong(2, purchase.getCustomerID());
-			ps.setDate(3, purchase.getPurchaseDate());
-			ps.setDouble(4, purchase.getPurchaseAmount());
-			ps.setLong(5, purchase.getID());
-						
+			ps.setDate(1, purchase.getPurchaseDate());
+			ps.setDouble(2, purchase.getPurchaseAmount());
+			ps.setLong(3, purchase.getId());
+			
+			//execute
 			int count = ps.executeUpdate();
 			
 			if(count > 1){
@@ -146,8 +161,8 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		}
 		PreparedStatement ps = null;
 		try {
+			//compile SQL
 			ps = connection.prepareStatement(deleteSQL);
-			
 			ps.setLong(1, id);
 			
 			int count = ps.executeUpdate();
@@ -173,12 +188,15 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		List<Purchase> listPurch = new ArrayList<>();
 		PreparedStatement ps = null;
 		try {
-			ps = connection.prepareStatement(retrieveSQL);
-			ps.setString(1, "customerID");
-			ps.setLong(2, customerID);
+			//compile SQL
+			ps = connection.prepareStatement(retrieveCustSQL);
+			//ps.setString(1, "customerID");
+			ps.setLong(1, customerID);
 			
+			//execute
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
+				//add rows to arraylist
 				Purchase purch = new Purchase();
 				purch.setId(rs.getLong("id"));
 				purch.setProductID(rs.getLong("productID"));
@@ -204,12 +222,15 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		List<Purchase> listPurch = new ArrayList<>();
 		PreparedStatement ps = null;
 		try {
-			ps = connection.prepareStatement(retrieveSQL);
-			ps.setString(1, "productID");
-			ps.setLong(2, productID);
+			//SQL
+			ps = connection.prepareStatement(retrieveProdSQL);
+			//ps.setString(1, "productID");
+			ps.setLong(1, productID);
 			
+			//execute
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
+				//add purchases to arraylist
 				Purchase purch = new Purchase();
 				purch.setId(rs.getLong("id"));
 				purch.setProductID(rs.getLong("productID"));
@@ -233,6 +254,8 @@ public class PurchaseDaoImpl implements PurchaseDAO
 	 */
 	public PurchaseSummary retrievePurchaseSummary(Connection connection, Long customerID) throws SQLException, DAOException{
 		List<Purchase> purchases = new ArrayList<>();
+		
+		//do the SQL in a different method
 		purchases = retrieveForCustomerID(connection, customerID);
 		
 		PurchaseSummary purchSum = new PurchaseSummary();
@@ -242,7 +265,7 @@ public class PurchaseDaoImpl implements PurchaseDAO
 		double min= Double.MAX_VALUE;
 		double max= Double.MIN_VALUE;
 		
-		for(Purchase p: purchases) {
+		for(Purchase p: purchases) { //find max and min values as we loop through the result set, add values to a sum
 			double amount = p.getPurchaseAmount();
 			if(amount<min) {
 				min = amount;

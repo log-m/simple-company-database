@@ -1,7 +1,9 @@
 package cs4347.jdbcProject.ecomm.services.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -76,13 +78,21 @@ public class CustomerPersistenceServiceImpl implements CustomerPersistenceServic
 			}
 		}
 	}
-}
+
 public Customer retrieve(Long id) throws SQLException, DAOException{
 		CustomerDAO custDAO = new CustomerDaoImpl();
+		AddressDAO aDAO = new AddressDaoImpl();
+		CreditCardDAO cDAO = new CreditCardDaoImpl();
 		Connection conn = dataSource.getConnection();
 		try {
 			conn.setAutoCommit(false);
-			Customer cust = CustomerDAO.retrieve(conn, id); //throw null ID DAOException in here
+			Customer cust = custDAO.retrieve(conn, id); //throw null ID DAOException in here
+			
+			//retrieve corresponding address and credit card instances to make a complete customer object
+			Address add = aDAO.retrieveForCustomerID(conn, id); 
+			CreditCard cred = cDAO.retrieveForCustomerID(conn, id);
+			cust.setAddress(add);
+			cust.setCreditCard(cred);
 			conn.commit();
 			return cust;
 		}
@@ -102,10 +112,18 @@ public Customer retrieve(Long id) throws SQLException, DAOException{
 	
 	public int update(Customer customer) throws SQLException, DAOException{
 		CustomerDAO custDAO = new CustomerDaoImpl();
+		AddressDAO aDAO = new AddressDaoImpl();
+		CreditCardDAO cDAO = new CreditCardDaoImpl();
 		Connection conn = dataSource.getConnection();
 		try {
 			conn.setAutoCommit(false);
 			int count = custDAO.update(conn, customer); //throw null ID DAOException in here
+			
+			//There are no update methods for creditcard and address, so just delete to old ones and create the new ones. assumption is that each customer only has 1 card and 1 address
+			aDAO.deleteForCustomerID(conn,customer.getId());
+			aDAO.create(conn, customer.getAddress(),customer.getId());
+			cDAO.deleteForCustomerID(conn, customer.getId());
+			cDAO.create(conn, customer.getCreditCard(), customer.getId());
 			conn.commit();
 			return count;
 		}
@@ -125,10 +143,12 @@ public Customer retrieve(Long id) throws SQLException, DAOException{
 	
 	public int delete(Long id) throws SQLException, DAOException{
 		CustomerDAO custDAO = new CustomerDaoImpl();
+		
 		Connection conn = dataSource.getConnection();
 		try {
 			conn.setAutoCommit(false);
 			int count = custDAO.delete(conn, id); //throw null ID DAOException in here
+			//creditcard and address are set to cascade delete, so we don't need to call the delete methods here
 			conn.commit();
 			return count;
 		}
@@ -146,14 +166,25 @@ public Customer retrieve(Long id) throws SQLException, DAOException{
 		}
 	}
 	
-	public Customer retrieveByZipCode(String zipCode) throws SQLException, DAOException{
+	public List<Customer> retrieveByZipCode(String zipCode) throws SQLException, DAOException{
 		CustomerDAO custDAO = new CustomerDaoImpl();
+		AddressDAO aDAO = new AddressDaoImpl();
+		CreditCardDAO cDAO = new CreditCardDaoImpl();
 		Connection conn = dataSource.getConnection();
+		
+		List<Customer> custList;
 		try {
 			conn.setAutoCommit(false);
-			Customer cust = custDAO.retrieveByZipCode(conn, zipCode); //throw null ID DAOException in here
+			 custList = custDAO.retrieveByZipCode(conn, zipCode); //throw null ID DAOException in here
+			 for(int i = 0; i < custList.size(); i++) {
+				 //match each customer retrieved with their address and credit card
+				 Address add = aDAO.retrieveForCustomerID(conn, custList.get(i).getId());
+				CreditCard cred = cDAO.retrieveForCustomerID(conn, custList.get(i).getId());
+				custList.get(i).setAddress(add);
+				custList.get(i).setCreditCard(cred);
+			 }
 			conn.commit();
-			return cust;
+			return custList;
 		}
 		catch(Exception ex) {
 			conn.rollback();
@@ -171,10 +202,19 @@ public Customer retrieve(Long id) throws SQLException, DAOException{
 	
 	public List<Customer> retrieveByDOB(Date startDate, Date endDate) throws SQLException, DAOException{
 		CustomerDAO custDAO = new CustomerDaoImpl();
+		AddressDAO aDAO = new AddressDaoImpl();
+		CreditCardDAO cDAO = new CreditCardDaoImpl();
 		Connection conn = dataSource.getConnection();
 		try {
 			conn.setAutoCommit(false);
 			List<Customer> custs = custDAO.retrieveByDOB(conn, startDate, endDate); //throw null ID DAOException in here
+			for(int i = 0; i < custs.size(); i++) {
+				//match each customer retrieved with their address and credit card
+				 Address add = aDAO.retrieveForCustomerID(conn, custs.get(i).getId());
+				CreditCard cred = cDAO.retrieveForCustomerID(conn, custs.get(i).getId());
+				custs.get(i).setAddress(add);
+				custs.get(i).setCreditCard(cred);
+			 }
 			conn.commit();
 			return custs;
 		}
